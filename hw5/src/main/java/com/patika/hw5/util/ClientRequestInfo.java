@@ -1,4 +1,4 @@
-package com.patika.hw5.uitl;
+package com.patika.hw5.util;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

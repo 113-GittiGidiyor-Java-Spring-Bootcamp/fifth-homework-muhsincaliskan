@@ -1,8 +1,12 @@
 package com.patika.hw5.controller;
 
 import com.patika.hw5.dto.InstructorDTO;
+import com.patika.hw5.dto.PermanentInstructorDTO;
+import com.patika.hw5.dto.VisitingResearchersDTO;
 import com.patika.hw5.entity.Instructor;
 import com.patika.hw5.entity.PermanentInstructor;
+import com.patika.hw5.entity.VisitingResearches;
+import com.patika.hw5.mappers.InstructorMapper;
 import com.patika.hw5.service.InstructorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
@@ -72,16 +77,38 @@ public class InstructorController {
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
     }
-    public ResponseEntity<Instructor> updateSalary(@PathVariable Long id,@RequestParam Number salary){
-        Optional<Instructor> instructorOptional=instructorService.findById(id);
-        //will fix
+    @Transactional
+    @PutMapping("/update-permanent-instructors-salary")
+    public ResponseEntity<PermanentInstructor> updatePermanentInstructorSalary(@PathVariable Long id,@RequestParam Number changePercent){
+        Optional<Instructor> instructorOptional= instructorService.findById(id);
         if (instructorOptional.isPresent()) {
-            if (instructorOptional.get() instanceof PermanentInstructor)
-                instructorOptional.get()=instructorOptional.getClass().cast(PermanentInstructor);
-            return new ResponseEntity<>(instructorService.update(instructor), HttpStatus.ACCEPTED);
+            if (instructorOptional.get().getClass()== PermanentInstructor.class) {
+                //need fix
+                PermanentInstructorDTO permanentInstructorDTO = (PermanentInstructorDTO) instructorOptional.get();
+                 permanentInstructorDTO.setFixedSalary( CalculateSalary(permanentInstructorDTO.getFixedSalary(),changePercent));
+            }
+
+            return new ResponseEntity<>(instructorService.update(), HttpStatus.ACCEPTED);
         }
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
     }
+    @Transactional
+    @PutMapping("/update-visiting-researchers-salary")
+    public ResponseEntity<Instructor> updateVisitingResearcherSalary(@PathVariable Long id,@RequestParam Number changePercent){
+        Optional<Instructor> instructorOptional= instructorService.findById(id);
+        if (instructorOptional.isPresent()) {
+            if (instructorOptional.get().getClass()== VisitingResearches.class) {
+                //need fix
+                VisitingResearchersDTO visitingResearchersDTO = ((VisitingResearches) instructorOptional.get());
+                visitingResearchersDTO.setHourlySalary( CalculateSalary(visitingResearchersDTO.getHourlySalary(),changePercent));
+            }
+            return new ResponseEntity<>(instructorService.update(), HttpStatus.ACCEPTED);
+        }
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
+    }
+    public double CalculateSalary(double salary,Number changePercent){
+        return salary+(salary*(double)changePercent/100);
+    }
 }

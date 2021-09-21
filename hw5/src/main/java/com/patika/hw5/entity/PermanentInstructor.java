@@ -18,5 +18,5 @@ import javax.persistence.Table;
 @Table(name = "permanent_instructors")
 public class PermanentInstructor extends Instructor{
     @Column(name="fixed_salary")
-    private Number fixedSalary;
+    private Double fixedSalary;
 }

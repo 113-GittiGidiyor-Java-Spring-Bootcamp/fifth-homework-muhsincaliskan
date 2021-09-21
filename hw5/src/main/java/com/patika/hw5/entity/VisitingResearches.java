@@ -21,5 +21,5 @@ import javax.persistence.Table;
 
 public class VisitingResearches extends Instructor{
     @Column(name="hourly_salary")
-    private Number hourlySalary;
+    private Double hourlySalary;
 }

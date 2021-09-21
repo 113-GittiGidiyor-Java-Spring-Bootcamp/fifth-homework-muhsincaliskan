@@ -55,11 +55,33 @@ public class InstructorController {
             return new ResponseEntity<>( instructorOptional.get(), HttpStatus.OK);
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
+    /**
+     * @param permanentInstructorDTO
+     */
+    @PostMapping("/save-permanent-instructor")
+    public ResponseEntity<PermanentInstructor> savePermanentInstructor(@RequestBody PermanentInstructorDTO permanentInstructorDTO){
+
+        Optional<PermanentInstructor> permanentInstructorOptional=instructorService.savePermanentInstructor(permanentInstructorDTO);
+        if (permanentInstructorOptional.isPresent())
+            return new ResponseEntity<>( permanentInstructorOptional.get(), HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+    /**
+     * @param visitingResearchersDTO
+     */
+    @PostMapping("/save-visiting-researcher-instructor")
+    public ResponseEntity<VisitingResearches> saveVisitingResearches(@RequestBody VisitingResearchersDTO visitingResearchersDTO){
+
+        Optional<VisitingResearches> visitingResearchesOptional=instructorService.saveVisitingResearches(visitingResearchersDTO);
+        if (visitingResearchesOptional.isPresent())
+            return new ResponseEntity<>( visitingResearchesOptional.get(), HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
 
     /**
      * @param id
      */
-    @DeleteMapping("/delete-instructor")
+    @DeleteMapping("/delete-instructor/{id}")
     public ResponseEntity<Instructor> delete(@PathVariable Long id){
         Optional<Instructor> instructorOptional=instructorService.findById(id);
         if (instructorOptional.isPresent()) {
@@ -78,37 +100,26 @@ public class InstructorController {
 
     }
     @Transactional
-    @PutMapping("/update-permanent-instructors-salary")
-    public ResponseEntity<PermanentInstructor> updatePermanentInstructorSalary(@PathVariable Long id,@RequestParam Number changePercent){
+    @PutMapping("/update-permanent-instructors-salary/{id}")
+    public ResponseEntity<?> updatePermanentInstructorSalary(@PathVariable Long id,@RequestParam Double changePercent){
         Optional<Instructor> instructorOptional= instructorService.findById(id);
-        if (instructorOptional.isPresent()) {
-            if (instructorOptional.get().getClass()== PermanentInstructor.class) {
-                //need fix
-                PermanentInstructorDTO permanentInstructorDTO = (PermanentInstructorDTO) instructorOptional.get();
-                 permanentInstructorDTO.setFixedSalary( CalculateSalary(permanentInstructorDTO.getFixedSalary(),changePercent));
-            }
-
-            return new ResponseEntity<>(instructorService.update(), HttpStatus.ACCEPTED);
+        if (instructorOptional.isPresent()&&instructorOptional.get() instanceof PermanentInstructor) {
+            instructorService.updatePermanentInstructorSalary(id,changePercent);
+            return new ResponseEntity<>("New Salary for "+id+" is changed.", HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
     }
     @Transactional
-    @PutMapping("/update-visiting-researchers-salary")
-    public ResponseEntity<Instructor> updateVisitingResearcherSalary(@PathVariable Long id,@RequestParam Number changePercent){
+    @PutMapping("/update-visiting-researchers-salary/{id}")
+    public ResponseEntity<?> updateVisitingResearcherSalary(@PathVariable Long id,@RequestParam Double changePercent){
         Optional<Instructor> instructorOptional= instructorService.findById(id);
-        if (instructorOptional.isPresent()) {
-            if (instructorOptional.get().getClass()== VisitingResearches.class) {
-                //need fix
-                VisitingResearchersDTO visitingResearchersDTO = ((VisitingResearches) instructorOptional.get());
-                visitingResearchersDTO.setHourlySalary( CalculateSalary(visitingResearchersDTO.getHourlySalary(),changePercent));
-            }
-            return new ResponseEntity<>(instructorService.update(), HttpStatus.ACCEPTED);
+        if (instructorOptional.isPresent()&&instructorOptional.get() instanceof VisitingResearches) {
+            instructorService.updateVisitingResearchesSalary(id,changePercent);
+            return new ResponseEntity<>("New Salary for "+id+" is changed.", HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
     }
-    public double CalculateSalary(double salary,Number changePercent){
-        return salary+(salary*(double)changePercent/100);
-    }
+
 }
